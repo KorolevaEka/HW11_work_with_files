@@ -24,7 +24,7 @@ public class FileParsingTest {
     @Test
     public void verifyZipFilesContentTest() throws Exception {
         try (InputStream is = cl.getResourceAsStream("resource.zip");
-             ZipInputStream zis = new ZipInputStream(InputStream.nullInputStream())) {
+             ZipInputStream zis = new ZipInputStream(is)) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().contains(".pdf")) {
@@ -35,11 +35,11 @@ public class FileParsingTest {
                     System.out.println("Successful check pdf file.");
                 } else if (entry.getName().contains(".xlsx")) {
                     XLS xls = new XLS(zis);
-                    Assertions.assertEquals("ООО СтройМаркет",
-                            xls.excel.getSheetAt(0)
-                                    .getRow(33)
+                    Assertions.assertEquals("ООО 'СтройМаркет'",
+                            String.valueOf(xls.excel.getSheetAt(0)
+                                    .getRow(0)
                                     .getCell(0)
-                                    .getStringCellValue());
+                                    .getStringCellValue()));
 
                     System.out.println("Successful check xlsx file.");
                 } else if (entry.getName().contains(".csv")) {
@@ -56,11 +56,10 @@ public class FileParsingTest {
 
     @Test
     void verifyJsonContentTest() throws Exception {
-        try (
-                InputStream is = cl.getResourceAsStream("test.json");
-                InputStreamReader reader = new InputStreamReader(is)
+
+        try (InputStream is = cl.getResourceAsStream("test.json");
         ) {
-            Shampoo shampoo = mapper.readValue(reader, Shampoo.class);
+            Shampoo shampoo = mapper.readValue(is, Shampoo.class);
             assertThat(shampoo.getBrand()).isEqualTo("Shampoo");
             assertThat(shampoo.getName()).isNotEmpty();
             int currentYear = Year.now().getValue();
@@ -69,6 +68,6 @@ public class FileParsingTest {
             System.out.println("Successful check json file.");
         }
     }
-
-
 }
+
+
